@@ -6,16 +6,17 @@ This repository contains the code used for [Populational pan-ethnic screening pa
 
 Three public datasets were involed in the study:
 
-- ChinaMap
+- The China Metabolic Analytics Project (ChinaMAP)
 
-    ChinaMap project provides a site-only VCF for downloading, after sign in [mbiobank](http://www.mbiobank.com/), the VCF file can be downloaded from [this page](http://www.mbiobank.com/download/)
+    ChinaMap provides a site-only VCF for downloading, after sign in [mbiobank](http://www.mbiobank.com/), the VCF file can be downloaded from [this page](http://www.mbiobank.com/download/)
 
-- WBBC
+- Westlake BioBank for Chinese (WBBC)
 
-    Westlake BioBank for Chinese (WBBC) also provides sites and allele frequencies VCFs of chr1~22,X,Y. Autosomal VCFs of GRCh38 were avaliable from [this page](https://wbbc.westlake.edu.cn/downloads.html)
+    WBBC also provides sites and allele frequencies VCFs. As we were focus on AR disease, only autosomal VCFs of GRCh38 were downloaded from [this page](https://wbbc.westlake.edu.cn/downloads.html)
 
-- gnomAD v3
+- The Genome Aggregation Database (gnomAD)
 
+    The variant dataset files of the latest release of gnomAD (v3) were avaliable from [this page](http://www.gnomad-sg.org/downloads#v3-variants). They contain information of all subsets: non-cancer, non-neuro, non-v2, non-TOPMed, controls/biobanks, 1KG, and HGDP. The non-cancer subset was later extracted for analysis in this study.
 
 ## Content description
 
