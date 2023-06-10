@@ -19,5 +19,5 @@ for vcf in output/candidate_vars/*/*vcf.gz;do
 
     python scripts/screen_pathogenetic_variant.py $addparams -f -v -i $vcf -p $outtable -g $outgcr
 
-     awk 'NR==1 || ($28=="." && ($11 == "CLINVAR_PLP" || $11 == "MISSENSE_DAMAGE")) || ($28~/VeryStrong/ && $11 == "NONSENSE_HC")' $outtable > $outtable.pathogenic.tsv
+    awk 'NR==1 || ($28=="." && ($11 == "CLINVAR_PLP" || $11 == "MISSENSE_DAMAGE")) || ($28~/VeryStrong/ && $11 == "NONSENSE_HC")' $outtable > $outtable.pathogenic.tsv
 done
