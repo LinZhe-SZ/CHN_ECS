@@ -20,8 +20,8 @@ Three public datasets were involed in the study:
 
 ## Content description
 
-### 1. **scripts**
+### 1. **`scripts/`**
 
-### 2. **analysis**
+### 2. **`analysis/`**
 
 ## Requirements

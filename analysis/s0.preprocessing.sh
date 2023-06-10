@@ -1,47 +1,45 @@
 #!/bin/bash
+set -eof pipefail
 
-#PBS -J 1-22
-#PBS -k oed
-#PBS -j oe
-#PBS -l nodes=1:ppn=1 -l mem=1G
-#PBS -V
-#PBS -S /bin/bash
-#PBS -q workq
-#PBS -o output/anno_vcfs/logs/parse_mbiobank_log.jobarray.o 
-#PBS -e output/anno_vcfs/logs/parse_mbiobank_log.jobarray.e
+# ChinaMap
+vcf=ChinaMAP.phase1.vcf.gz
+outdir=output/pass_vcfs/ChinaMap/
+mkdir -p outdir
 
-cd $PBS_O_WORKDIR
-source ~/miniconda3/bin/activate
-conda activate vep
-mkdir -p output/anno_vcfs
+for i in {1..22};do
+    passvcf=$outdir/ChinaMap.chr$i.pass.vcf.gz
+    bcftools index -f $vcf
+    bcftools norm -m - $vcf chr$i | bcftools view -e "AC==0 | AF > 0.05 | QUAL <= 100 | AN < 10229" -Oz -o $passvcf 
+    bcftools index $passvcf
+    bcftools stats $passvcf > $passvcf.stats
+done
 
-n_count=22
-if [[ $(($PBS_ARRAY_INDEX % 22)) -ne 0 ]];then
-    n_count=$(($PBS_ARRAY_INDEX % 22))
-fi
+# WBBC
+vcflist=wbbc_vcfs.list # a list contains file path of WBBC VCFs, one file per line
+outdir=output/pass_vcfs/WBBC/
+mkdir -p outdir
+cat $vcflist | while read -r vcf;do
+    passvcf=$outdir/WBBC.chr$i.pass.vcf.gz
+    ln $vcf $passvcf # all variants were considered high quality
+    bcftools index $passvcf
+    bcftools stats $passvcf > $passvcf.stats
+done
 
-invcf=$(grep mbiobank all_vcfs.list |head -n $n_count | tail -n1)
-vcffn=$(basename $invcf)
-annovcf=output/anno_vcfs/raw_anno/${vcffn%.vcf.gz}.anno.vcf.gz
-tmpvcf=output/anno_vcfs/raw_anno/${vcffn%.vcf.gz}.anno.tmp.vcf.gz
+# gnomAD v3
+vcflist=gnomAD_vcfs.list # a list contains file path of gnomAD VCFs, one file per line
 
-echo ">PBS_ARRAY_INDEX:$PBS_ARRAY_INDEX"
-echo ">invcf:$invcf"
-echo ">vcffn:$vcffn"
-echo ">annovcf:$annovcf"
-echo ">tmpvcf:$tmpvcf"
-
-[[ -f $tmpvcf ]] && echo "$annovcf not finished" && exit 
-
-POP=CHN
-
-mkdir -p output/anno_vcfs/mbiobank/$POP
-outvcf=output/anno_vcfs/mbiobank/$POP/${vcffn%.vcf.gz}.anno.vcf.gz
-passvcf=output/pass_vcfs/mbiobank/$POP/${vcffn%.vcf.gz}.anno.$POP.vcf.gz
-echo "Generating $outvcf..."
-
-set -x
-/ehpcdata/analysis/linzhe/lowDepth/resourse/software/bcftools-1.16/bcftools view -e "AC == 0 | AF > 0.05" -Oz -o $passvcf $outvcf
-/ehpcdata/analysis/linzhe/lowDepth/resourse/software/bcftools-1.16/bcftools index $passvcf
-/ehpcdata/analysis/linzhe/lowDepth/resourse/software/bcftools-1.16/bcftools stats $passvcf > $passvcf.stats
-set +x
+POPS=("EAS" "EUR" "AFR" "AMR" "SAS")
+for pop in "${POPS[@]}";do # extract variants of each sub-population respectively
+    outdir=output/pass_vcfs/gnomAD_${pop}/
+    mkdir -p outdir
+    cat $vcflist | while read -r vcf;do
+        pn=$(echo $POP | tr '[:upper:]' '[:lower:]')
+        if [[ $pn == "eur" ]];then
+            pn='nfe'
+        fi
+        passvcf=$outdir/gnomAD_${pop}.chr$i.pass.vcf.gz
+        bcftools norm -m - $vcf | bcftools view -e "AF_non_cancer_${pn} == 0 | AF_non_cancer_${pn} > 0.05" -i "FILTER=="PASS"' -Oz -o $passvcf
+        bcftools index $passvcf
+        bcftools stats $passvcf > $passvcf.stats
+    done
+done
